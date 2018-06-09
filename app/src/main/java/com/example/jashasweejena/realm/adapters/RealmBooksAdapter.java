@@ -12,6 +12,7 @@ public class RealmBooksAdapter extends RealmModelAdapter<Book> {
 
         super(context, realmResults, automaticUpdate);
 
+
     }
 
 

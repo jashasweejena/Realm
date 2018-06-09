@@ -2,6 +2,7 @@ package com.example.jashasweejena.realm.activity;
 
 import android.content.DialogInterface;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.example.jashasweejena.realm.adapters.RealmBooksAdapter;
 import com.example.jashasweejena.realm.app.Prefs;
 import com.example.jashasweejena.realm.model.Book;
 import com.example.jashasweejena.realm.realm.RealmController;
+import com.nikoyuwono.realmbrowser.RealmBrowser;
 
 import org.w3c.dom.Text;
 
@@ -34,11 +36,12 @@ import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
 
-   private RecyclerView recyclerView;
-   private BooksAdapter adapter;
-   private FloatingActionButton fab;
-   private Realm realm;
-   private LayoutInflater layoutInflater;
+    private RecyclerView recyclerView;
+    private BooksAdapter adapter;
+    private FloatingActionButton fab;
+    private Realm realm;
+    private LayoutInflater layoutInflater;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +58,17 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        RealmBrowser realmBrowser = new RealmBrowser();
+        realmBrowser.start();
+        realmBrowser.showServerAddress(this);
 
 
         setupRecycler();
 
+
+        //This means that setRealmData() will be called iff getPreLoad() returns false.
+        //Once setRealmData() is called, it will automatically set boolean PRE_LOAD to true and thus
+        //we need not reload the same data again and again, thereby saving memory.
         if (!Prefs.with(this).getPreLoad()) {
 
             setRealmData();
@@ -101,9 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
                                     Toast.makeText(MainActivity.this, "Enter title. Entry not saved.", Toast.LENGTH_SHORT).show();
 
-                                }
-
-                                else {
+                                } else {
 
                                     realm.beginTransaction();
                                     realm.copyToRealm(book);
@@ -131,19 +139,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     public void setRealmAdapter(RealmResults<Book> books) {
 
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
-        Realm.setDefaultConfiguration(realmConfiguration);
-
-
-        RealmBooksAdapter realmAdapter = new RealmBooksAdapter(MainActivity.this, books, true);
+        RealmBooksAdapter realmAdapter = new RealmBooksAdapter(MainActivity.this, books, false);
         //Set the data and tell the RecyclerView to draw
         adapter.setRealmBaseAdapter(realmAdapter);
         adapter.notifyDataSetChanged();
     }
 
-    public void setupRecycler(){
+    public void setupRecycler() {
         //So that changes in content doesn't affect the size of recyclerview and which, in turn, improves performance
         recyclerView.setHasFixedSize(true);
 
@@ -157,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    public void setRealmData(){
+    public void setRealmData() {
 
         ArrayList<Book> books = new ArrayList<>();
 
@@ -196,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
         book.setImageUrl("https://api.androidhive.info/images/realm/5.png");
         books.add(book);
 
-        for(Book b : books) {
+        for (Book b : books) {
 
             realm.beginTransaction();
             realm.copyToRealm(b);

@@ -138,7 +138,7 @@ public class BooksAdapter extends RealmRecyclerViewAdapter<Book> {
 
                                 realm.copyToRealm(book);
                                 realm.commitTransaction();
-                                
+
                                 notifyDataSetChanged();
                             }
                         })
@@ -159,11 +159,13 @@ public class BooksAdapter extends RealmRecyclerViewAdapter<Book> {
 
     @Override
     public int getItemCount() {
-        if(getRealmAdapter() != null)
-        {
-            return getRealmAdapter().getCount();
-        }
-        return 0;
+//        if(getRealmAdapter() != null)
+//        {
+//            return getRealmAdapter().getCount();
+//        }
+//        return 0;
+
+        return RealmController.getInstance().getBooks().size();
     }
 
     public class CardViewHolder extends RecyclerView.ViewHolder {
